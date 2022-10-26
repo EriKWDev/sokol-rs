@@ -8,6 +8,5 @@ fn main() {
         .flag_if_supported("-Wno-unused-value")
         .flag_if_supported("-Wno-unused-parameter");
 
-    build
-        .compile("sokol-stb");
+    build.compile("sokol-stb");
 }

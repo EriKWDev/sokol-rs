@@ -31,11 +31,11 @@ mod ffi {
     #[repr(C)]
     #[derive(Debug)]
     pub struct SgPassAction {
-        _start_canary: u32,
-        colors: [super::SgColorAttachmentAction; SG_MAX_COLOR_ATTACHMENTS],
-        depth: super::SgDepthAttachmentAction,
-        stencil: super::SgStencilAttachmentAction,
-        _end_canary: u32,
+        pub _start_canary: u32,
+        pub colors: [super::SgColorAttachmentAction; SG_MAX_COLOR_ATTACHMENTS],
+        pub depth: super::SgDepthAttachmentAction,
+        pub stencil: super::SgStencilAttachmentAction,
+        pub _end_canary: u32,
     }
 
     impl SgPassAction {
@@ -59,14 +59,14 @@ mod ffi {
     #[repr(C)]
     #[derive(Default, Debug)]
     pub struct SgBindings {
-        _start_canary: u32,
-        vertex_buffers: [super::SgBuffer; SG_MAX_SHADERSTAGE_BUFFERS],
-        vertex_buffer_offsets: [c_int; SG_MAX_SHADERSTAGE_BUFFERS],
-        index_buffer: super::SgBuffer,
-        index_buffer_offset: c_int,
-        vs_images: [super::SgImage; SG_MAX_SHADERSTAGE_IMAGES],
-        fs_images: [super::SgImage; SG_MAX_SHADERSTAGE_IMAGES],
-        _end_canary: u32,
+        pub _start_canary: u32,
+        pub vertex_buffers: [super::SgBuffer; SG_MAX_SHADERSTAGE_BUFFERS],
+        pub vertex_buffer_offsets: [c_int; SG_MAX_SHADERSTAGE_BUFFERS],
+        pub index_buffer: super::SgBuffer,
+        pub index_buffer_offset: c_int,
+        pub vs_images: [super::SgImage; SG_MAX_SHADERSTAGE_IMAGES],
+        pub fs_images: [super::SgImage; SG_MAX_SHADERSTAGE_IMAGES],
+        pub _end_canary: u32,
     }
 
     impl SgBindings {
@@ -82,8 +82,7 @@ mod ffi {
             b
         }
 
-        fn collect_buffers(bindings: &mut SgBindings,
-                           src: &super::SgBindings) {
+        fn collect_buffers(bindings: &mut SgBindings, src: &super::SgBindings) {
             for (idx, vb) in src.vertex_buffers.iter().enumerate() {
                 bindings.vertex_buffers[idx] = *vb;
             }
@@ -105,18 +104,18 @@ mod ffi {
     #[repr(C)]
     #[derive(Debug)]
     pub struct SgDesc {
-        _start_canary: u32,
+        pub _start_canary: u32,
         pub desc: super::SgDesc,
-        mtl_device: *const c_void,
-        mtl_renderpass_descriptor_cb: unsafe extern fn() -> *const c_void,
-        mtl_drawable_cb: unsafe extern fn() -> *const c_void,
-        mtl_global_uniform_buffer_size: c_int,
-        mtl_sampler_cache_size: c_int,
-        d3d11_device: *const c_void,
-        d3d11_device_context: *const c_void,
-        d3d11_render_target_view_cb: unsafe extern fn() -> *const c_void,
-        d3d11_depth_stencil_view_cb: unsafe extern fn() -> *const c_void,
-        _end_canary: u32,
+        pub mtl_device: *const c_void,
+        pub mtl_renderpass_descriptor_cb: unsafe extern "C" fn() -> *const c_void,
+        pub mtl_drawable_cb: unsafe extern "C" fn() -> *const c_void,
+        pub mtl_global_uniform_buffer_size: c_int,
+        pub mtl_sampler_cache_size: c_int,
+        pub d3d11_device: *const c_void,
+        pub d3d11_device_context: *const c_void,
+        pub d3d11_render_target_view_cb: unsafe extern "C" fn() -> *const c_void,
+        pub d3d11_depth_stencil_view_cb: unsafe extern "C" fn() -> *const c_void,
+        pub _end_canary: u32,
     }
 
     impl SgDesc {
@@ -143,16 +142,16 @@ mod ffi {
     #[repr(C)]
     #[derive(Debug)]
     pub struct SgBufferDesc {
-        _start_canary: u32,
-        size: c_int,
-        buffer_type: super::SgBufferType,
-        usage: super::SgUsage,
-        content: *const c_void,
-        label: *const c_char,
-        gl_buffers: [u32; SG_NUM_INFLIGHT_FRAMES],
-        mtl_buffers: [*const c_void; SG_NUM_INFLIGHT_FRAMES],
-        d3d11_buffer: *const c_void,
-        _end_canary: u32,
+        pub _start_canary: u32,
+        pub size: c_int,
+        pub buffer_type: super::SgBufferType,
+        pub usage: super::SgUsage,
+        pub content: *const c_void,
+        pub label: *const c_char,
+        pub gl_buffers: [u32; SG_NUM_INFLIGHT_FRAMES],
+        pub mtl_buffers: [*const c_void; SG_NUM_INFLIGHT_FRAMES],
+        pub d3d11_buffer: *const c_void,
+        pub _end_canary: u32,
     }
 
     impl SgBufferDesc {
@@ -180,9 +179,9 @@ mod ffi {
 
     #[repr(C)]
     #[derive(Copy, Clone, Debug)]
-    struct SgSubImageContent {
-        ptr: *const c_void,
-        size: c_int,
+    pub struct SgSubImageContent {
+        pub ptr: *const c_void,
+        pub size: c_int,
     }
 
     impl Default for SgSubImageContent {
@@ -196,17 +195,15 @@ mod ffi {
 
     #[repr(C)]
     pub struct SgImageContent {
-        subimage: [SgSubImageContent; 6 * SG_MAX_MIPMAPS],
+        pub subimage: [SgSubImageContent; 6 * SG_MAX_MIPMAPS],
     }
 
     impl Default for SgImageContent {
         fn default() -> Self {
             Self {
-                subimage: [
-                    SgSubImageContent {
-                        ..Default::default()
-                    }; 96
-                ]
+                subimage: [SgSubImageContent {
+                    ..Default::default()
+                }; 96],
             }
         }
     }
@@ -256,34 +253,37 @@ mod ffi {
     #[repr(C)]
     #[derive(Debug)]
     pub struct SgImageDesc {
-        _start_canary: u32,
-        image_type: super::SgImageType,
-        render_target: bool,
-        width: c_int,
-        height: c_int,
-        depth_or_layers: c_int,
-        num_mipmaps: c_int,
-        usage: super::SgUsage,
-        pixel_format: super::SgPixelFormat,
-        sample_count: c_int,
-        min_filter: super::SgFilter,
-        mag_filter: super::SgFilter,
-        wrap_u: super::SgWrap,
-        wrap_v: super::SgWrap,
-        wrap_w: super::SgWrap,
-        max_anisotropy: u32,
-        min_lod: f32,
-        max_lod: f32,
-        content: SgImageContent,
-        label: *const c_char,
-        gl_textures: [u32; SG_NUM_INFLIGHT_FRAMES],
-        mtl_textures: [*const c_void; SG_NUM_INFLIGHT_FRAMES],
-        d3d11_texture: *const c_void,
-        _end_canary: u32,
+        pub _start_canary: u32,
+        pub image_type: super::SgImageType,
+        pub render_target: bool,
+        pub width: c_int,
+        pub height: c_int,
+        pub depth_or_layers: c_int,
+        pub num_mipmaps: c_int,
+        pub usage: super::SgUsage,
+        pub pixel_format: super::SgPixelFormat,
+        pub sample_count: c_int,
+        pub min_filter: super::SgFilter,
+        pub mag_filter: super::SgFilter,
+        pub wrap_u: super::SgWrap,
+        pub wrap_v: super::SgWrap,
+        pub wrap_w: super::SgWrap,
+        pub max_anisotropy: u32,
+        pub min_lod: f32,
+        pub max_lod: f32,
+        pub content: SgImageContent,
+        pub label: *const c_char,
+        pub gl_textures: [u32; SG_NUM_INFLIGHT_FRAMES],
+        pub mtl_textures: [*const c_void; SG_NUM_INFLIGHT_FRAMES],
+        pub d3d11_texture: *const c_void,
+        pub _end_canary: u32,
     }
 
     impl SgImageDesc {
-        pub fn make<T>(content: Option<&[(*const T, i32)]>, desc: &super::SgImageDesc) -> SgImageDesc {
+        pub fn make<T>(
+            content: Option<&[(*const T, i32)]>,
+            desc: &super::SgImageDesc,
+        ) -> SgImageDesc {
             SgImageDesc {
                 _start_canary: 0,
                 image_type: desc.image_type,
@@ -315,10 +315,10 @@ mod ffi {
 
     #[repr(C)]
     #[derive(Copy, Clone, Debug)]
-    struct SgShaderAttrDesc {
-        name: *const c_char,
-        sem_name: *const c_char,
-        sem_index: c_int,
+    pub struct SgShaderAttrDesc {
+        pub name: *const c_char,
+        pub sem_name: *const c_char,
+        pub sem_index: c_int,
     }
 
     impl Default for SgShaderAttrDesc {
@@ -333,10 +333,10 @@ mod ffi {
 
     #[repr(C)]
     #[derive(Copy, Clone, Debug)]
-    struct SgShaderUniformDesc {
-        name: *const c_char,
-        uniform_type: super::SgUniformType,
-        array_count: c_int,
+    pub struct SgShaderUniformDesc {
+        pub name: *const c_char,
+        pub uniform_type: super::SgUniformType,
+        pub array_count: c_int,
     }
 
     impl Default for SgShaderUniformDesc {
@@ -351,16 +351,16 @@ mod ffi {
 
     #[repr(C)]
     #[derive(Copy, Clone, Default, Debug)]
-    struct SgShaderUniformBlockDesc {
-        size: c_int,
-        uniforms: [SgShaderUniformDesc; SG_MAX_UB_MEMBERS],
+    pub struct SgShaderUniformBlockDesc {
+        pub size: c_int,
+        pub uniforms: [SgShaderUniformDesc; SG_MAX_UB_MEMBERS],
     }
 
     #[repr(C)]
     #[derive(Copy, Clone, Debug)]
-    struct SgShaderImageDesc {
-        name: *const c_char,
-        image_type: super::SgImageType,
+    pub struct SgShaderImageDesc {
+        pub name: *const c_char,
+        pub image_type: super::SgImageType,
     }
 
     impl Default for SgShaderImageDesc {
@@ -374,13 +374,13 @@ mod ffi {
 
     #[repr(C)]
     #[derive(Debug)]
-    struct SgShaderStageDesc {
-        source: *const c_char,
-        byte_code: *const u8,
-        byte_code_size: c_int,
-        entry: *const c_char,
-        uniform_blocks: [SgShaderUniformBlockDesc; SG_MAX_SHADERSTAGE_UBS],
-        images: [SgShaderImageDesc; SG_MAX_SHADERSTAGE_IMAGES],
+    pub struct SgShaderStageDesc {
+        pub source: *const c_char,
+        pub byte_code: *const u8,
+        pub byte_code_size: c_int,
+        pub entry: *const c_char,
+        pub uniform_blocks: [SgShaderUniformBlockDesc; SG_MAX_SHADERSTAGE_UBS],
+        pub images: [SgShaderImageDesc; SG_MAX_SHADERSTAGE_IMAGES],
     }
 
     impl Default for SgShaderStageDesc {
@@ -390,12 +390,8 @@ mod ffi {
                 byte_code: null(),
                 byte_code_size: 0,
                 entry: null(),
-                uniform_blocks: [
-                    Default::default(); SG_MAX_SHADERSTAGE_UBS
-                ],
-                images: [
-                    Default::default(); SG_MAX_SHADERSTAGE_IMAGES
-                ],
+                uniform_blocks: [Default::default(); SG_MAX_SHADERSTAGE_UBS],
+                images: [Default::default(); SG_MAX_SHADERSTAGE_IMAGES],
             }
         }
     }
@@ -403,12 +399,12 @@ mod ffi {
     #[repr(C)]
     #[derive(Debug)]
     pub struct SgShaderDesc {
-        _start_canary: u32,
-        attrs: [SgShaderAttrDesc; SG_MAX_VERTEX_ATTRIBUTES],
-        vs: SgShaderStageDesc,
-        fs: SgShaderStageDesc,
-        label: *const c_char,
-        _end_canary: u32,
+        pub _start_canary: u32,
+        pub attrs: [SgShaderAttrDesc; SG_MAX_VERTEX_ATTRIBUTES],
+        pub vs: SgShaderStageDesc,
+        pub fs: SgShaderStageDesc,
+        pub label: *const c_char,
+        pub _end_canary: u32,
     }
 
     impl SgShaderDesc {
@@ -467,8 +463,7 @@ mod ffi {
             }
         }
 
-        fn collect_attrs(desc: &mut SgShaderDesc,
-                         src: &[super::SgShaderAttrDesc]) {
+        fn collect_attrs(desc: &mut SgShaderDesc, src: &[super::SgShaderAttrDesc]) {
             for (idx, attr) in src.iter().enumerate() {
                 let name = CString::new(attr.name).unwrap();
                 let sem_name = CString::new(attr.sem_name).unwrap();
@@ -481,8 +476,10 @@ mod ffi {
             }
         }
 
-        fn collect_uniforms(desc: &mut SgShaderUniformBlockDesc,
-                            src: &[super::SgShaderUniformDesc]) {
+        fn collect_uniforms(
+            desc: &mut SgShaderUniformBlockDesc,
+            src: &[super::SgShaderUniformDesc],
+        ) {
             for (idx, u) in src.iter().enumerate() {
                 let dst = &mut desc.uniforms[idx];
 
@@ -494,8 +491,10 @@ mod ffi {
             }
         }
 
-        fn collect_uniform_blocks(desc: &mut SgShaderStageDesc,
-                                  src: &[super::SgShaderUniformBlockDesc]) {
+        fn collect_uniform_blocks(
+            desc: &mut SgShaderStageDesc,
+            src: &[super::SgShaderUniformBlockDesc],
+        ) {
             for (idx, ub) in src.iter().enumerate() {
                 let dst = &mut desc.uniform_blocks[idx];
                 dst.size = ub.size;
@@ -503,8 +502,7 @@ mod ffi {
             }
         }
 
-        fn collect_images(desc: &mut SgShaderStageDesc,
-                          src: &[super::SgShaderImageDesc]) {
+        fn collect_images(desc: &mut SgShaderStageDesc, src: &[super::SgShaderImageDesc]) {
             for (idx, img) in src.iter().enumerate() {
                 let dst = &mut desc.images[idx];
 
@@ -527,9 +525,9 @@ mod ffi {
     #[repr(C)]
     #[derive(Debug)]
     pub struct SgVertexAttrDesc {
-        buffer_index: c_int,
-        offset: c_int,
-        format: super::SgVertexFormat,
+        pub buffer_index: c_int,
+        pub offset: c_int,
+        pub format: super::SgVertexFormat,
     }
 
     impl Default for SgVertexAttrDesc {
@@ -545,40 +543,40 @@ mod ffi {
     #[repr(C)]
     #[derive(Default, Debug)]
     pub struct SgLayoutDesc {
-        buffers: [SgBufferLayoutDesc; SG_MAX_SHADERSTAGE_BUFFERS],
-        attrs: [SgVertexAttrDesc; SG_MAX_VERTEX_ATTRIBUTES],
+        pub buffers: [SgBufferLayoutDesc; SG_MAX_SHADERSTAGE_BUFFERS],
+        pub attrs: [SgVertexAttrDesc; SG_MAX_VERTEX_ATTRIBUTES],
     }
 
     #[repr(C)]
     #[derive(Debug)]
     pub struct SgBlendState {
-        enabled: bool,
-        src_factor_rgb: super::SgBlendFactor,
-        dst_factor_rgb: super::SgBlendFactor,
-        op_rgb: super::SgBlendOp,
-        src_factor_alpha: super::SgBlendFactor,
-        dst_factor_alpha: super::SgBlendFactor,
-        op_alpha: super::SgBlendOp,
-        color_write_mask: u8,
-        color_attachment_count: c_int,
-        color_format: super::SgPixelFormat,
-        depth_format: super::SgPixelFormat,
-        blend_color: [f32; 4],
+        pub enabled: bool,
+        pub src_factor_rgb: super::SgBlendFactor,
+        pub dst_factor_rgb: super::SgBlendFactor,
+        pub op_rgb: super::SgBlendOp,
+        pub src_factor_alpha: super::SgBlendFactor,
+        pub dst_factor_alpha: super::SgBlendFactor,
+        pub op_alpha: super::SgBlendOp,
+        pub color_write_mask: u8,
+        pub color_attachment_count: c_int,
+        pub color_format: super::SgPixelFormat,
+        pub depth_format: super::SgPixelFormat,
+        pub blend_color: [f32; 4],
     }
 
     #[repr(C)]
     #[derive(Debug)]
     pub struct SgPipelineDesc {
-        _start_canary: u32,
-        layout: SgLayoutDesc,
-        shader: super::SgShader,
-        primitive_type: super::SgPrimitiveType,
-        index_type: super::SgIndexType,
-        depth_stencil: super::SgDepthStencilState,
-        blend: SgBlendState,
-        rasterizer: super::SgRasterizerState,
-        label: *const c_char,
-        _end_canary: u32,
+        pub _start_canary: u32,
+        pub layout: SgLayoutDesc,
+        pub shader: super::SgShader,
+        pub primitive_type: super::SgPrimitiveType,
+        pub index_type: super::SgIndexType,
+        pub depth_stencil: super::SgDepthStencilState,
+        pub blend: SgBlendState,
+        pub rasterizer: super::SgRasterizerState,
+        pub label: *const c_char,
+        pub _end_canary: u32,
     }
 
     impl SgPipelineDesc {
@@ -617,8 +615,7 @@ mod ffi {
             pip
         }
 
-        fn collect_layout_buffers(desc: &mut SgLayoutDesc,
-                                  src: &[super::SgBufferLayoutDesc]) {
+        fn collect_layout_buffers(desc: &mut SgLayoutDesc, src: &[super::SgBufferLayoutDesc]) {
             for (idx, buf) in src.iter().enumerate() {
                 desc.buffers[idx] = SgBufferLayoutDesc {
                     stride: buf.stride as c_int,
@@ -628,8 +625,7 @@ mod ffi {
             }
         }
 
-        fn collect_layout_attrs(desc: &mut SgLayoutDesc,
-                                src: &[super::SgVertexAttrDesc]) {
+        fn collect_layout_attrs(desc: &mut SgLayoutDesc, src: &[super::SgVertexAttrDesc]) {
             for (idx, attr) in src.iter().enumerate() {
                 desc.attrs[idx] = SgVertexAttrDesc {
                     buffer_index: attr.buffer_index,
@@ -643,11 +639,11 @@ mod ffi {
     #[repr(C)]
     #[derive(Debug)]
     pub struct SgPassDesc {
-        _start_canary: u32,
-        color_attachments: [super::SgAttachmentDesc; SG_MAX_COLOR_ATTACHMENTS],
-        depth_stencil_attachment: super::SgAttachmentDesc,
-        label: *const c_char,
-        _end_canary: u32,
+        pub _start_canary: u32,
+        pub color_attachments: [super::SgAttachmentDesc; SG_MAX_COLOR_ATTACHMENTS],
+        pub depth_stencil_attachment: super::SgAttachmentDesc,
+        pub label: *const c_char,
+        pub _end_canary: u32,
     }
 
     impl SgPassDesc {
@@ -668,7 +664,7 @@ mod ffi {
         }
     }
 
-    extern {
+    extern "C" {
         pub fn sg_setup(desc: *const SgDesc);
         pub fn sg_shutdown();
         pub fn sg_isvalid() -> bool;
@@ -691,7 +687,11 @@ mod ffi {
 
         pub fn sg_update_buffer(buf: super::SgBuffer, data_ptr: *const c_void, data_size: c_int);
         pub fn sg_update_image(img: super::SgImage, data: *const SgImageContent);
-        pub fn sg_append_buffer(buf: super::SgBuffer, data_ptr: *const c_void, data_size: c_int) -> c_int;
+        pub fn sg_append_buffer(
+            buf: super::SgBuffer,
+            data_ptr: *const c_void,
+            data_size: c_int,
+        ) -> c_int;
         pub fn sg_query_buffer_overflow(buf: super::SgBuffer) -> bool;
 
         pub fn sg_query_buffer_state(buf: super::SgBuffer) -> super::SgResourceState;
@@ -700,26 +700,31 @@ mod ffi {
         pub fn sg_query_pipeline_state(pip: super::SgPipeline) -> super::SgResourceState;
         pub fn sg_query_pass_state(pass: super::SgPass) -> super::SgResourceState;
 
-        pub fn sg_begin_default_pass(pass_action: *const SgPassAction,
-                                     width: c_int,
-                                     height: c_int);
-        pub fn sg_begin_pass(pass: super::SgPass,
-                             pass_action: *const SgPassAction);
-        pub fn sg_apply_viewport(x: c_int, y: c_int,
-                                 width: c_int, height: c_int,
-                                 origin_top_left: bool);
-        pub fn sg_apply_scissor_rect(x: c_int, y: c_int,
-                                     width: c_int, height: c_int,
-                                     origin_top_left: bool);
+        pub fn sg_begin_default_pass(pass_action: *const SgPassAction, width: c_int, height: c_int);
+        pub fn sg_begin_pass(pass: super::SgPass, pass_action: *const SgPassAction);
+        pub fn sg_apply_viewport(
+            x: c_int,
+            y: c_int,
+            width: c_int,
+            height: c_int,
+            origin_top_left: bool,
+        );
+        pub fn sg_apply_scissor_rect(
+            x: c_int,
+            y: c_int,
+            width: c_int,
+            height: c_int,
+            origin_top_left: bool,
+        );
         pub fn sg_apply_pipeline(pip: super::SgPipeline);
         pub fn sg_apply_bindings(bindings: *const SgBindings);
-        pub fn sg_apply_uniforms(stage: super::SgShaderStage,
-                                 ub_index: c_int,
-                                 data: *const c_void,
-                                 num_bytes: c_int);
-        pub fn sg_draw(base_element: c_int,
-                       num_elements: c_int,
-                       num_instances: c_int);
+        pub fn sg_apply_uniforms(
+            stage: super::SgShaderStage,
+            ub_index: c_int,
+            data: *const c_void,
+            num_bytes: c_int,
+        );
+        pub fn sg_draw(base_element: c_int, num_elements: c_int, num_instances: c_int);
         pub fn sg_end_pass();
 
         pub fn sg_commit();
@@ -733,37 +738,37 @@ mod ffi {
 #[repr(C)]
 #[derive(Copy, Clone, Default, Debug)]
 pub struct SgBuffer {
-    id: i32,
+    pub id: i32,
 }
 
 #[repr(C)]
 #[derive(Copy, Clone, Default, Debug)]
 pub struct SgImage {
-    id: i32,
+    pub id: i32,
 }
 
 #[repr(C)]
 #[derive(Copy, Clone, Default, Debug)]
 pub struct SgShader {
-    id: i32,
+    pub id: i32,
 }
 
 #[repr(C)]
 #[derive(Copy, Clone, Default, Debug)]
 pub struct SgPipeline {
-    id: i32,
+    pub id: i32,
 }
 
 #[repr(C)]
 #[derive(Copy, Clone, Default, Debug)]
 pub struct SgPass {
-    id: i32,
+    pub id: i32,
 }
 
 #[repr(C)]
 #[derive(Copy, Clone, Default, Debug)]
 pub struct SgContext {
-    id: i32,
+    pub id: i32,
 }
 
 /*
@@ -1388,9 +1393,7 @@ pub union SgAttachmentDescValue {
 
 impl Default for SgAttachmentDescValue {
     fn default() -> Self {
-        Self {
-            face: 0,
-        }
+        Self { face: 0 }
     }
 }
 
@@ -1437,9 +1440,7 @@ pub fn sg_shutdown() {
 }
 
 pub fn sg_isvalid() -> bool {
-    unsafe {
-        ffi::sg_isvalid()
-    }
+    unsafe { ffi::sg_isvalid() }
 }
 
 pub fn sg_query_desc() -> SgDesc {
@@ -1450,15 +1451,11 @@ pub fn sg_query_desc() -> SgDesc {
 }
 
 pub fn sg_query_backend() -> SgBackend {
-    unsafe {
-        ffi::sg_query_backend()
-    }
+    unsafe { ffi::sg_query_backend() }
 }
 
 pub fn sg_query_feature(feature: SgFeature) -> bool {
-    unsafe {
-        ffi::sg_query_feature(feature)
-    }
+    unsafe { ffi::sg_query_feature(feature) }
 }
 
 pub fn sg_reset_state_cache() {
@@ -1468,33 +1465,23 @@ pub fn sg_reset_state_cache() {
 }
 
 pub fn sg_make_buffer<T>(content: Option<&T>, desc: &SgBufferDesc) -> SgBuffer {
-    unsafe {
-        ffi::sg_make_buffer(&ffi::SgBufferDesc::make(content, desc))
-    }
+    unsafe { ffi::sg_make_buffer(&ffi::SgBufferDesc::make(content, desc)) }
 }
 
 pub fn sg_make_image<T>(content: Option<&[(*const T, i32)]>, desc: &SgImageDesc) -> SgImage {
-    unsafe {
-        ffi::sg_make_image(&ffi::SgImageDesc::make(content, desc))
-    }
+    unsafe { ffi::sg_make_image(&ffi::SgImageDesc::make(content, desc)) }
 }
 
 pub fn sg_make_shader(desc: &SgShaderDesc) -> SgShader {
-    unsafe {
-        ffi::sg_make_shader(&ffi::SgShaderDesc::make(desc))
-    }
+    unsafe { ffi::sg_make_shader(&ffi::SgShaderDesc::make(desc)) }
 }
 
 pub fn sg_make_pipeline(desc: &SgPipelineDesc) -> SgPipeline {
-    unsafe {
-        ffi::sg_make_pipeline(&ffi::SgPipelineDesc::make(desc))
-    }
+    unsafe { ffi::sg_make_pipeline(&ffi::SgPipelineDesc::make(desc)) }
 }
 
 pub fn sg_make_pass(desc: &SgPassDesc) -> SgPass {
-    unsafe {
-        ffi::sg_make_pass(&ffi::SgPassDesc::make(desc))
-    }
+    unsafe { ffi::sg_make_pass(&ffi::SgPassDesc::make(desc)) }
 }
 
 pub fn sg_destroy_buffer(buf: SgBuffer) {
@@ -1548,39 +1535,27 @@ pub fn sg_append_buffer<T>(buf: SgBuffer, content: &T, content_size: i32) -> i32
 }
 
 pub fn sg_query_buffer_overflow(buf: SgBuffer) -> bool {
-    unsafe {
-        ffi::sg_query_buffer_overflow(buf)
-    }
+    unsafe { ffi::sg_query_buffer_overflow(buf) }
 }
 
 pub fn sg_query_buffer_state(buf: SgBuffer) -> SgResourceState {
-    unsafe {
-        ffi::sg_query_buffer_state(buf)
-    }
+    unsafe { ffi::sg_query_buffer_state(buf) }
 }
 
 pub fn sg_query_image_state(img: SgImage) -> SgResourceState {
-    unsafe {
-        ffi::sg_query_image_state(img)
-    }
+    unsafe { ffi::sg_query_image_state(img) }
 }
 
 pub fn sg_query_shader_state(shd: SgShader) -> SgResourceState {
-    unsafe {
-        ffi::sg_query_shader_state(shd)
-    }
+    unsafe { ffi::sg_query_shader_state(shd) }
 }
 
 pub fn sg_query_pipeline_state(pip: SgPipeline) -> SgResourceState {
-    unsafe {
-        ffi::sg_query_pipeline_state(pip)
-    }
+    unsafe { ffi::sg_query_pipeline_state(pip) }
 }
 
 pub fn sg_query_pass_state(pass: SgPass) -> SgResourceState {
-    unsafe {
-        ffi::sg_query_pass_state(pass)
-    }
+    unsafe { ffi::sg_query_pass_state(pass) }
 }
 
 pub fn sg_begin_default_pass(pass_action: &SgPassAction, width: i32, height: i32) {
@@ -1590,25 +1565,20 @@ pub fn sg_begin_default_pass(pass_action: &SgPassAction, width: i32, height: i32
     }
 }
 
-pub fn sg_begin_pass(pass: SgPass,
-                     pass_action: &SgPassAction) {
+pub fn sg_begin_pass(pass: SgPass, pass_action: &SgPassAction) {
     let action = ffi::SgPassAction::make(pass_action);
     unsafe {
         ffi::sg_begin_pass(pass, &action);
     }
 }
 
-pub fn sg_apply_viewport(x: i32, y: i32,
-                         width: i32, height: i32,
-                         origin_top_left: bool) {
+pub fn sg_apply_viewport(x: i32, y: i32, width: i32, height: i32, origin_top_left: bool) {
     unsafe {
         ffi::sg_apply_viewport(x, y, width, height, origin_top_left);
     }
 }
 
-pub fn sg_apply_scissor_rect(x: i32, y: i32,
-                             width: i32, height: i32,
-                             origin_top_left: bool) {
+pub fn sg_apply_scissor_rect(x: i32, y: i32, width: i32, height: i32, origin_top_left: bool) {
     unsafe {
         ffi::sg_apply_scissor_rect(x, y, width, height, origin_top_left);
     }
@@ -1626,23 +1596,15 @@ pub fn sg_apply_bindings(bindings: &SgBindings) {
     }
 }
 
-pub fn sg_apply_uniforms<T>(stage: SgShaderStage,
-                            ub_index: i32,
-                            data: &T,
-                            num_bytes: i32) {
+pub fn sg_apply_uniforms<T>(stage: SgShaderStage, ub_index: i32, data: &T, num_bytes: i32) {
     let ptr = data as *const T;
 
     unsafe {
-        ffi::sg_apply_uniforms(stage,
-                               ub_index,
-                               ptr as *const c_void,
-                               num_bytes);
+        ffi::sg_apply_uniforms(stage, ub_index, ptr as *const c_void, num_bytes);
     }
 }
 
-pub fn sg_draw(base_element: i32,
-               num_elements: i32,
-               num_instances: i32) {
+pub fn sg_draw(base_element: i32, num_elements: i32, num_instances: i32) {
     unsafe {
         ffi::sg_draw(base_element, num_elements, num_instances);
     }

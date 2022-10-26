@@ -15,13 +15,13 @@ pub mod ffi {
     #[repr(C)]
     #[derive(Debug)]
     pub struct SImGuiDesc {
-        max_vertices: i32,
-        color_format: SgPixelFormat,
-        depth_format: SgPixelFormat,
-        sample_count: i32,
-        dpi_scale: f32,
-        ini_filename: *const c_char,
-        no_default_font: bool,
+        pub max_vertices: i32,
+        pub color_format: SgPixelFormat,
+        pub depth_format: SgPixelFormat,
+        pub sample_count: i32,
+        pub dpi_scale: f32,
+        pub ini_filename: *const c_char,
+        pub no_default_font: bool,
     }
 
     impl SImGuiDesc {
@@ -40,7 +40,7 @@ pub mod ffi {
         }
     }
 
-    extern {
+    extern "C" {
         pub fn simgui_setup(desc: *const SImGuiDesc);
         pub fn simgui_new_frame(width: c_int, height: c_int, delta_time: f64);
         pub fn simgui_render();
@@ -79,9 +79,7 @@ pub fn simgui_render() {
 }
 
 pub fn simgui_handle_event(event: &SAppEvent) -> bool {
-    unsafe {
-        ffi::simgui_handle_event(&sokol::app::ffi::SAppEvent::translate(event))
-    }
+    unsafe { ffi::simgui_handle_event(&sokol::app::ffi::SAppEvent::translate(event)) }
 }
 
 pub fn simgui_shutdown() {
@@ -91,9 +89,7 @@ pub fn simgui_shutdown() {
 }
 
 pub fn imgui_begin_main_menu_bar() -> bool {
-    unsafe {
-        ig_begin_main_menu_bar()
-    }
+    unsafe { ig_begin_main_menu_bar() }
 }
 
 pub fn imgui_end_main_menu_bar() {
@@ -103,9 +99,7 @@ pub fn imgui_end_main_menu_bar() {
 }
 
 pub fn imgui_begin_menu(label: &str, enabled: bool) -> bool {
-    unsafe {
-        ig_begin_menu(label.as_ptr() as *const c_char, enabled)
-    }
+    unsafe { ig_begin_menu(label.as_ptr() as *const c_char, enabled) }
 }
 
 pub fn imgui_menu_item(label: &str, shortcut: Option<&str>, p_selected: &mut bool, enabled: bool) {
@@ -113,7 +107,7 @@ pub fn imgui_menu_item(label: &str, shortcut: Option<&str>, p_selected: &mut boo
         let l = label.as_ptr() as *const c_char;
         let s = match shortcut {
             Some(s) => s.as_ptr() as *const c_char,
-            None => null()
+            None => null(),
         };
         ig_menu_item(l, s, p_selected, enabled);
     }

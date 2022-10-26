@@ -2,7 +2,7 @@ use std::os::raw::c_void;
 use std::ptr::null;
 
 pub mod ffi {
-    extern {
+    extern "C" {
         pub fn sg_imgui_wrap_init(ctx: *mut super::SgImGui);
         pub fn sg_imgui_wrap_discard(ctx: *mut super::SgImGui);
         pub fn sg_imgui_wrap_draw(ctx: *mut super::SgImGui);

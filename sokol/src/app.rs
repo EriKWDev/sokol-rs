@@ -21,23 +21,23 @@ pub mod ffi {
     #[repr(C)]
     #[derive(Copy, Clone, Debug)]
     pub struct SAppEvent {
-        frame_count: u64,
-        event_type: super::SAppEventType,
-        key_code: super::SAppKeycode,
-        char_code: u32,
-        key_repeat: bool,
-        modifiers: super::SAppModifier,
-        mouse_button: super::SAppMouseButton,
-        mouse_x: f32,
-        mouse_y: f32,
-        scroll_x: f32,
-        scroll_y: f32,
-        num_touches: c_int,
-        touches: [super::SAppTouchPoint; SAPP_MAX_TOUCHPOINTS],
-        window_width: c_int,
-        window_height: c_int,
-        framebuffer_width: c_int,
-        framebuffer_height: c_int,
+        pub frame_count: u64,
+        pub event_type: super::SAppEventType,
+        pub key_code: super::SAppKeycode,
+        pub char_code: u32,
+        pub key_repeat: bool,
+        pub modifiers: super::SAppModifier,
+        pub mouse_button: super::SAppMouseButton,
+        pub mouse_x: f32,
+        pub mouse_y: f32,
+        pub scroll_x: f32,
+        pub scroll_y: f32,
+        pub num_touches: c_int,
+        pub touches: [super::SAppTouchPoint; SAPP_MAX_TOUCHPOINTS],
+        pub window_width: c_int,
+        pub window_height: c_int,
+        pub framebuffer_width: c_int,
+        pub framebuffer_height: c_int,
     }
 
     impl SAppEvent {
@@ -67,39 +67,39 @@ pub mod ffi {
     #[repr(C)]
     #[derive(Debug)]
     pub struct SAppDesc {
-        init_cb: *const c_void,
-        frame_cb: *const c_void,
-        cleanup_cb: *const c_void,
-        event_cb: *const c_void,
-        fail_cb: *const c_void,
+        pub init_cb: *const c_void,
+        pub frame_cb: *const c_void,
+        pub cleanup_cb: *const c_void,
+        pub event_cb: *const c_void,
+        pub fail_cb: *const c_void,
 
-        user_data: *mut c_void,
-        init_userdata_cb: extern fn(*mut c_void),
-        frame_userdata_cb: extern fn(*mut c_void),
-        cleanup_userdata_cb: extern fn(*mut c_void),
-        event_userdata_cb: extern fn(*const SAppEvent, *mut c_void),
-        fail_userdata_cb: extern fn(*const c_char, *mut c_void),
+        pub user_data: *mut c_void,
+        pub init_userdata_cb: extern "C" fn(*mut c_void),
+        pub frame_userdata_cb: extern "C" fn(*mut c_void),
+        pub cleanup_userdata_cb: extern "C" fn(*mut c_void),
+        pub event_userdata_cb: extern "C" fn(*const SAppEvent, *mut c_void),
+        pub fail_userdata_cb: extern "C" fn(*const c_char, *mut c_void),
 
-        width: c_int,
-        height: c_int,
-        sample_count: c_int,
-        swap_interval: c_int,
-        high_dpi: bool,
-        fullscreen: bool,
-        alpha: bool,
-        window_title: *const c_char,
-        user_cursor: bool,
+        pub width: c_int,
+        pub height: c_int,
+        pub sample_count: c_int,
+        pub swap_interval: c_int,
+        pub high_dpi: bool,
+        pub fullscreen: bool,
+        pub alpha: bool,
+        pub window_title: *const c_char,
+        pub user_cursor: bool,
 
-        html5_canvas_name: *const c_char,
-        html5_canvas_resize: bool,
-        html5_preserve_drawing_buffer: bool,
-        html5_premultiplied_alpha: bool,
-        html5_ask_leave_site: bool,
-        ios_keyboard_resizes_canvas: bool,
-        gl_force_gles2: bool,
+        pub html5_canvas_name: *const c_char,
+        pub html5_canvas_resize: bool,
+        pub html5_preserve_drawing_buffer: bool,
+        pub html5_premultiplied_alpha: bool,
+        pub html5_ask_leave_site: bool,
+        pub ios_keyboard_resizes_canvas: bool,
+        pub gl_force_gles2: bool,
     }
 
-    extern {
+    extern "C" {
         /// sokol entry point (compiled with SOKOL_NO_ENTRY)
         pub fn sapp_run(desc: *const SAppDesc) -> c_int;
 
@@ -173,25 +173,23 @@ pub mod ffi {
     }
 
     #[no_mangle]
-    pub extern fn init_userdata_cb(user_data: *mut c_void) {
+    pub extern "C" fn init_userdata_cb(user_data: *mut c_void) {
         super::SAppImpl::get(user_data).init_cb();
     }
 
     #[no_mangle]
-    pub extern fn frame_userdata_cb(user_data: *mut c_void) {
+    pub extern "C" fn frame_userdata_cb(user_data: *mut c_void) {
         super::SAppImpl::get(user_data).frame_cb();
     }
 
     #[no_mangle]
-    pub extern fn cleanup_userdata_cb(user_data: *mut c_void) {
+    pub extern "C" fn cleanup_userdata_cb(user_data: *mut c_void) {
         super::SAppImpl::get(user_data).cleanup_cb();
     }
 
     #[no_mangle]
-    pub extern fn event_userdata_cb(event: *const SAppEvent, user_data: *mut c_void) {
-        let e = *unsafe {
-            &*event
-        };
+    pub extern "C" fn event_userdata_cb(event: *const SAppEvent, user_data: *mut c_void) {
+        let e = *unsafe { &*event };
 
         super::SAppImpl::get(user_data).event_cb(super::SAppEvent {
             frame_count: e.frame_count,
@@ -215,16 +213,19 @@ pub mod ffi {
     }
 
     #[no_mangle]
-    pub extern fn fail_userdata_cb(message: *const c_char, user_data: *mut c_void) {
-        let msg = unsafe {
-            CStr::from_ptr(message)
-        };
+    pub extern "C" fn fail_userdata_cb(message: *const c_char, user_data: *mut c_void) {
+        let msg = unsafe { CStr::from_ptr(message) };
 
         super::SAppImpl::get(user_data).fail_cb(msg.to_str().unwrap());
     }
 
     #[no_mangle]
-    pub extern fn stream_userdata_cb(buffer: *mut f32, num_frames: c_int, num_channels: c_int, user_data: *mut c_void) {
+    pub extern "C" fn stream_userdata_cb(
+        buffer: *mut f32,
+        num_frames: c_int,
+        num_channels: c_int,
+        user_data: *mut c_void,
+    ) {
         let arr = unsafe {
             let len = num_frames * num_channels;
             from_raw_parts_mut(buffer, len as usize)
@@ -489,7 +490,7 @@ pub trait SApp {
 }
 
 pub struct SAppImpl {
-    callbacks: Box<SApp>,
+    callbacks: Box<dyn SApp>,
     desc: SAppDesc,
 }
 
@@ -522,7 +523,8 @@ impl SAppImpl {
     }
 
     pub fn stream_cb(&mut self, buffer: &mut [f32], num_frames: i32, num_channels: i32) {
-        self.callbacks.saudio_stream(buffer, num_frames, num_channels);
+        self.callbacks
+            .saudio_stream(buffer, num_frames, num_channels);
     }
 
     pub fn get(user_data: *mut c_void) -> &'static mut SAppImpl {
@@ -533,43 +535,30 @@ impl SAppImpl {
     }
 }
 
-pub fn sapp_run<S: SApp + 'static>(callbacks: S,
-                                   desc: SAppDesc) -> i32 {
+pub fn sapp_run<S: SApp + 'static>(callbacks: S, desc: SAppDesc) -> i32 {
     let app = SAppImpl::new(callbacks, desc);
 
-    unsafe {
-        ffi::sapp_run(&ffi::sapp_make_desc(&app))
-    }
+    unsafe { ffi::sapp_run(&ffi::sapp_make_desc(&app)) }
 }
 
 pub fn sapp_isvalid() -> bool {
-    unsafe {
-        ffi::sapp_isvalid()
-    }
+    unsafe { ffi::sapp_isvalid() }
 }
 
 pub fn sapp_width() -> i32 {
-    unsafe {
-        ffi::sapp_width()
-    }
+    unsafe { ffi::sapp_width() }
 }
 
 pub fn sapp_height() -> i32 {
-    unsafe {
-        ffi::sapp_height()
-    }
+    unsafe { ffi::sapp_height() }
 }
 
 pub fn sapp_high_dpi() -> bool {
-    unsafe {
-        ffi::sapp_high_dpi()
-    }
+    unsafe { ffi::sapp_high_dpi() }
 }
 
 pub fn sapp_dpi_scale() -> f32 {
-    unsafe {
-        ffi::sapp_dpi_scale()
-    }
+    unsafe { ffi::sapp_dpi_scale() }
 }
 
 pub fn sapp_show_keyboard(visible: bool) {
@@ -579,9 +568,7 @@ pub fn sapp_show_keyboard(visible: bool) {
 }
 
 pub fn sapp_keyboard_shown() -> bool {
-    unsafe {
-        ffi::sapp_keyboard_shown()
-    }
+    unsafe { ffi::sapp_keyboard_shown() }
 }
 
 pub fn sapp_request_quit() {
@@ -603,13 +590,9 @@ pub fn sapp_quit() {
 }
 
 pub fn sapp_frame_count() -> u64 {
-    unsafe {
-        ffi::sapp_frame_count()
-    }
+    unsafe { ffi::sapp_frame_count() }
 }
 
 pub fn sapp_gles2() -> bool {
-    unsafe {
-        ffi::sapp_gles2()
-    }
+    unsafe { ffi::sapp_gles2() }
 }

@@ -25,7 +25,7 @@ impl SApp for SAudio {
         if path.is_some() {
             self.audio_stream = match saudio_vorbis_open(&path.unwrap()) {
                 Err(_) => None,
-                Ok(s) => Some(s)
+                Ok(s) => Some(s),
             };
         }
 
@@ -39,12 +39,10 @@ impl SApp for SAudio {
 
     fn sapp_frame(&mut self) {
         let pass_action = SgPassAction {
-            colors: vec![
-                SgColorAttachmentAction {
-                    action: SgAction::Clear,
-                    val: [1.0, 0.5, 0.0, 1.0],
-                }
-            ],
+            colors: vec![SgColorAttachmentAction {
+                action: SgAction::Clear,
+                val: [1.0, 0.5, 0.0, 1.0],
+            }],
             ..Default::default()
         };
 
@@ -64,7 +62,8 @@ impl SApp for SAudio {
                 let buffer_requested = &mut (*buffer)[..buffer_size_requested];
 
                 if num_frames > 0 {
-                    let frames_decoded = saudio_vorbis_decode(stream, buffer_requested, num_channels);
+                    let frames_decoded =
+                        saudio_vorbis_decode(stream, buffer_requested, num_channels);
                     if frames_decoded != 0 {
                         saudio_push(buffer_requested, frames_decoded);
                     }
@@ -94,7 +93,7 @@ impl SApp for SAudio {
             if event.char_code == 'r' as u32 {
                 match &mut self.audio_stream {
                     None => {}
-                    Some(stream) => saudio_vorbis_rewind(stream)
+                    Some(stream) => saudio_vorbis_rewind(stream),
                 }
             }
         }
@@ -135,7 +134,8 @@ fn main() {
             height: 600,
             window_title: title,
             ..Default::default()
-        });
+        },
+    );
 
     std::process::exit(exit_code);
 }

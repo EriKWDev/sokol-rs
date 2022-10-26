@@ -3,8 +3,8 @@ use std::io;
 use std::os::raw::c_int;
 use std::ptr;
 
-use memmap::MmapOptions;
 use memmap::Mmap;
+use memmap::MmapOptions;
 use std::slice::from_raw_parts;
 
 mod ffi {
@@ -15,54 +15,58 @@ mod ffi {
 
     #[repr(C)]
     pub struct StbVorbis {
-        _opaque: usize,
+        pub _opaque: usize,
     }
 
     #[repr(C)]
     pub struct StbVorbisInfo {
         pub sample_rate: c_uint,
         pub channels: c_int,
-        setup_memory_required: c_uint,
-        setup_temp_memory_required: c_uint,
-        temp_memory_required: c_uint,
+        pub setup_memory_required: c_uint,
+        pub setup_temp_memory_required: c_uint,
+        pub temp_memory_required: c_uint,
         pub max_frame_size: c_int,
     }
 
     #[repr(C)]
     pub struct StbVorbisAlloc {
-        alloc_buffer: *mut c_char,
-        alloc_buffer_length_in_bytes: c_int,
+        pub alloc_buffer: *mut c_char,
+        pub alloc_buffer_length_in_bytes: c_int,
     }
 
-    extern {
+    extern "C" {
         pub fn stb_vorbis_get_info(f: *mut StbVorbis) -> StbVorbisInfo;
 
         pub fn stb_vorbis_close(f: *mut StbVorbis);
 
-        pub fn stb_vorbis_open_pushdata(datablock: *const c_uchar,
-                                        datablock_length_in_bytes: c_int,
-                                        datablock_memory_consumed_in_bytes: *mut c_int,
-                                        error: *mut c_int,
-                                        alloc_buffer: *const StbVorbisAlloc) -> *mut StbVorbis;
+        pub fn stb_vorbis_open_pushdata(
+            datablock: *const c_uchar,
+            datablock_length_in_bytes: c_int,
+            datablock_memory_consumed_in_bytes: *mut c_int,
+            error: *mut c_int,
+            alloc_buffer: *const StbVorbisAlloc,
+        ) -> *mut StbVorbis;
 
-        pub fn stb_vorbis_decode_frame_pushdata(f: *mut StbVorbis,
-                                                datablock: *const c_uchar,
-                                                datablock_length_in_bytes: c_int,
-                                                channels: *mut c_int,
-                                                output: *mut *mut *mut f32,
-                                                samples: *mut c_int) -> c_int;
+        pub fn stb_vorbis_decode_frame_pushdata(
+            f: *mut StbVorbis,
+            datablock: *const c_uchar,
+            datablock_length_in_bytes: c_int,
+            channels: *mut c_int,
+            output: *mut *mut *mut f32,
+            samples: *mut c_int,
+        ) -> c_int;
 
         pub fn stb_vorbis_flush_pushdata(f: *mut StbVorbis);
     }
 }
 
 pub struct SAudioVorbis {
-    mmap: Mmap,
-    f: *mut ffi::StbVorbis,
-    read_pos: usize,
-    last_frame_decoded: *mut *mut f32,
-    last_frame_samples: i32,
-    last_frame_channels: i32,
+    pub mmap: Mmap,
+    pub f: *mut ffi::StbVorbis,
+    pub read_pos: usize,
+    pub last_frame_decoded: *mut *mut f32,
+    pub last_frame_samples: i32,
+    pub last_frame_channels: i32,
     pub info: SAudioVorbisInfo,
 }
 
@@ -96,17 +100,17 @@ pub fn saudio_vorbis_open(path: &str) -> Result<SAudioVorbis, io::Error> {
     };
 
     if f == ptr::null_mut() || error != VORBIS_NO_ERROR {
-        return Err(io::Error::new(io::ErrorKind::Other,
-                                  if error == VORBIS_NEED_MORE_DATA {
-                                      "insufficient buffer size"
-                                  } else {
-                                      "failed to open vorbis stream"
-                                  }));
+        return Err(io::Error::new(
+            io::ErrorKind::Other,
+            if error == VORBIS_NEED_MORE_DATA {
+                "insufficient buffer size"
+            } else {
+                "failed to open vorbis stream"
+            },
+        ));
     }
 
-    let info = unsafe {
-        ffi::stb_vorbis_get_info(f)
-    };
+    let info = unsafe { ffi::stb_vorbis_get_info(f) };
 
     Ok(SAudioVorbis {
         mmap,
@@ -154,9 +158,11 @@ pub fn saudio_vorbis_rewind(stream: &mut SAudioVorbis) {
 ///
 /// The number of _samples per channel_ written to the output buffer is
 /// returned, which equals `<return value> * output_channels` float values.
-pub fn saudio_vorbis_decode(stream: &mut SAudioVorbis,
-                            output_buffer: &mut [f32],
-                            output_channels: i32) -> i32 {
+pub fn saudio_vorbis_decode(
+    stream: &mut SAudioVorbis,
+    output_buffer: &mut [f32],
+    output_channels: i32,
+) -> i32 {
     let mut samples_read = 0;
     let mut output_written = 0;
     let mut need_more_data = true;
@@ -164,7 +170,10 @@ pub fn saudio_vorbis_decode(stream: &mut SAudioVorbis,
     if stream.last_frame_samples > 0 {
         // left-over decoded data from last pass
         let decoded = unsafe {
-            from_raw_parts(stream.last_frame_decoded, stream.last_frame_channels as usize)
+            from_raw_parts(
+                stream.last_frame_decoded,
+                stream.last_frame_channels as usize,
+            )
         };
         let (more_data, written) = saudio_vorbis_mix(
             decoded,
@@ -242,13 +251,14 @@ pub fn saudio_vorbis_decode(stream: &mut SAudioVorbis,
     output_written / output_channels
 }
 
-fn saudio_vorbis_mix(decoded: &[*mut f32],
-                     decoded_samples: i32,
-                     decoded_channels: i32,
-                     output_buffer: &mut [f32],
-                     output_pos: i32,
-                     output_channels: i32) -> (bool, i32) {
-
+fn saudio_vorbis_mix(
+    decoded: &[*mut f32],
+    decoded_samples: i32,
+    decoded_channels: i32,
+    output_buffer: &mut [f32],
+    output_pos: i32,
+    output_channels: i32,
+) -> (bool, i32) {
     if decoded_channels != output_channels {
         unimplemented!("");
     }

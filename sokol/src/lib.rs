@@ -67,9 +67,9 @@ extern crate sokol_sys as sys;
 
 #[macro_export]
 macro_rules! cstr {
-    ($s:expr) => (
+    ($s:expr) => {
         concat!($s, "\0")
-    )
+    };
 }
 
 pub mod app;

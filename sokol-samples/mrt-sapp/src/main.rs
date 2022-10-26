@@ -91,30 +91,12 @@ impl SApp for MRT {
         self.create_offscreen_pass(sapp_width(), sapp_height());
 
         let cube_vertices: [f32; 96] = [
-            -1.0, -1.0, -1.0, 1.0,
-            1.0, -1.0, -1.0, 1.0,
-            1.0, 1.0, -1.0, 1.0,
-            -1.0, 1.0, -1.0, 1.0,
-            -1.0, -1.0, 1.0, 0.8,
-            1.0, -1.0, 1.0, 0.8,
-            1.0, 1.0, 1.0, 0.8,
-            -1.0, 1.0, 1.0, 0.8,
-            -1.0, -1.0, -1.0, 0.6,
-            -1.0, 1.0, -1.0, 0.6,
-            -1.0, 1.0, 1.0, 0.6,
-            -1.0, -1.0, 1.0, 0.6,
-            1.0, -1.0, -1.0, 0.4,
-            1.0, 1.0, -1.0, 0.4,
-            1.0, 1.0, 1.0, 0.4,
-            1.0, -1.0, 1.0, 0.4,
-            -1.0, -1.0, -1.0, 0.5,
-            -1.0, -1.0, 1.0, 0.5,
-            1.0, -1.0, 1.0, 0.5,
-            1.0, -1.0, -1.0, 0.5,
-            -1.0, 1.0, -1.0, 0.7,
-            -1.0, 1.0, 1.0, 0.7,
-            1.0, 1.0, 1.0, 0.7,
-            1.0, 1.0, -1.0, 0.7,
+            -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0,
+            -1.0, -1.0, 1.0, 0.8, 1.0, -1.0, 1.0, 0.8, 1.0, 1.0, 1.0, 0.8, -1.0, 1.0, 1.0, 0.8,
+            -1.0, -1.0, -1.0, 0.6, -1.0, 1.0, -1.0, 0.6, -1.0, 1.0, 1.0, 0.6, -1.0, -1.0, 1.0, 0.6,
+            1.0, -1.0, -1.0, 0.4, 1.0, 1.0, -1.0, 0.4, 1.0, 1.0, 1.0, 0.4, 1.0, -1.0, 1.0, 0.4,
+            -1.0, -1.0, -1.0, 0.5, -1.0, -1.0, 1.0, 0.5, 1.0, -1.0, 1.0, 0.5, 1.0, -1.0, -1.0, 0.5,
+            -1.0, 1.0, -1.0, 0.7, -1.0, 1.0, 1.0, 0.7, 1.0, 1.0, 1.0, 0.7, 1.0, 1.0, -1.0, 0.7,
         ];
 
         let cube_vbuf = sg_make_buffer(
@@ -126,12 +108,8 @@ impl SApp for MRT {
         );
 
         let cube_indices: [u16; 36] = [
-            0, 1, 2, 0, 2, 3,
-            6, 5, 4, 7, 6, 4,
-            8, 9, 10, 8, 10, 11,
-            14, 13, 12, 15, 14, 12,
-            16, 17, 18, 16, 18, 19,
-            22, 21, 20, 23, 22, 20
+            0, 1, 2, 0, 2, 3, 6, 5, 4, 7, 6, 4, 8, 9, 10, 8, 10, 11, 14, 13, 12, 15, 14, 12, 16,
+            17, 18, 16, 18, 19, 22, 21, 20, 23, 22, 20,
         ];
 
         let cube_ibuf = sg_make_buffer(
@@ -234,96 +212,84 @@ impl SApp for MRT {
             _ => panic!()
         };
 
-        let cube_shd = sg_make_shader(
-            &SgShaderDesc {
+        let cube_shd = sg_make_shader(&SgShaderDesc {
+            attrs: vec![
+                SgShaderAttrDesc {
+                    name: "position",
+                    sem_name: "POSITION",
+                    ..Default::default()
+                },
+                SgShaderAttrDesc {
+                    name: "bright0",
+                    sem_name: "BRIGHT",
+                    ..Default::default()
+                },
+            ],
+            vs: SgShaderStageDesc {
+                source: Some(cube_vs_src),
+                uniform_blocks: vec![SgShaderUniformBlockDesc {
+                    size: 64,
+                    uniforms: vec![SgShaderUniformDesc {
+                        name: "mvp",
+                        uniform_type: SgUniformType::Mat4,
+                        ..Default::default()
+                    }],
+                }],
+                ..Default::default()
+            },
+            fs: SgShaderStageDesc {
+                source: Some(cube_fs_src),
+                ..Default::default()
+            },
+        });
+
+        self.offscreen_pipeline = sg_make_pipeline(&SgPipelineDesc {
+            layout: SgLayoutDesc {
+                buffers: vec![SgBufferLayoutDesc {
+                    stride: 16,
+                    ..Default::default()
+                }],
                 attrs: vec![
-                    SgShaderAttrDesc {
-                        name: "position",
-                        sem_name: "POSITION",
+                    SgVertexAttrDesc {
+                        format: SgVertexFormat::Float3,
+                        offset: 0,
                         ..Default::default()
                     },
-                    SgShaderAttrDesc {
-                        name: "bright0",
-                        sem_name: "BRIGHT",
+                    SgVertexAttrDesc {
+                        format: SgVertexFormat::Float,
+                        offset: 12,
                         ..Default::default()
                     },
                 ],
-                vs: SgShaderStageDesc {
-                    source: Some(cube_vs_src),
-                    uniform_blocks: vec!(
-                        SgShaderUniformBlockDesc {
-                            size: 64,
-                            uniforms: vec!(
-                                SgShaderUniformDesc {
-                                    name: "mvp",
-                                    uniform_type: SgUniformType::Mat4,
-                                    ..Default::default()
-                                }
-                            ),
-                        }
-                    ),
-                    ..Default::default()
-                },
-                fs: SgShaderStageDesc {
-                    source: Some(cube_fs_src),
-                    ..Default::default()
-                },
             },
-        );
-
-        self.offscreen_pipeline = sg_make_pipeline(
-            &SgPipelineDesc {
-                layout: SgLayoutDesc {
-                    buffers: vec!(
-                        SgBufferLayoutDesc {
-                            stride: 16,
-                            ..Default::default()
-                        }
-                    ),
-                    attrs: vec!(
-                        SgVertexAttrDesc {
-                            format: SgVertexFormat::Float3,
-                            offset: 0,
-                            ..Default::default()
-                        },
-                        SgVertexAttrDesc {
-                            format: SgVertexFormat::Float,
-                            offset: 12,
-                            ..Default::default()
-                        },
-                    ),
-                },
-                shader: cube_shd,
-                index_type: SgIndexType::UInt16,
-                depth_stencil: SgDepthStencilState {
-                    depth_compare_func: SgCompareFunc::LessEqual,
-                    depth_write_enabled: true,
-                    ..Default::default()
-                },
-                blend: SgBlendState {
-                    color_attachment_count: 3,
-                    color_format: SgPixelFormat::RGBA8,
-                    depth_format: SgPixelFormat::Depth,
-                    ..Default::default()
-                },
-                rasterizer: SgRasterizerState {
-                    cull_mode: SgCullMode::Back,
-                    sample_count: MSAA_SAMPLES,
-                    ..Default::default()
-                },
+            shader: cube_shd,
+            index_type: SgIndexType::UInt16,
+            depth_stencil: SgDepthStencilState {
+                depth_compare_func: SgCompareFunc::LessEqual,
+                depth_write_enabled: true,
                 ..Default::default()
-            }
-        );
+            },
+            blend: SgBlendState {
+                color_attachment_count: 3,
+                color_format: SgPixelFormat::RGBA8,
+                depth_format: SgPixelFormat::Depth,
+                ..Default::default()
+            },
+            rasterizer: SgRasterizerState {
+                cull_mode: SgCullMode::Back,
+                sample_count: MSAA_SAMPLES,
+                ..Default::default()
+            },
+            ..Default::default()
+        });
 
         self.offscreen_bindings = SgBindings {
-            vertex_buffers: vec!(cube_vbuf),
+            vertex_buffers: vec![cube_vbuf],
             index_buffer: cube_ibuf,
             ..Default::default()
         };
 
-        let quad_vertices: [f32; 8] = [
-            0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0
-        ];
+        let quad_vertices: [f32; 8] = [0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0];
 
         let quad_vbuf = sg_make_buffer(
             Some(&quad_vertices),
@@ -446,75 +412,63 @@ impl SApp for MRT {
             _ => panic!()
         };
 
-        let fsq_shd = sg_make_shader(
-            &SgShaderDesc {
-                attrs: vec![
-                    SgShaderAttrDesc {
-                        name: "pos",
-                        sem_name: "POSITION",
+        let fsq_shd = sg_make_shader(&SgShaderDesc {
+            attrs: vec![SgShaderAttrDesc {
+                name: "pos",
+                sem_name: "POSITION",
+                ..Default::default()
+            }],
+            vs: SgShaderStageDesc {
+                source: Some(fsq_vs_src),
+                uniform_blocks: vec![SgShaderUniformBlockDesc {
+                    size: 8,
+                    uniforms: vec![SgShaderUniformDesc {
+                        name: "offset",
+                        uniform_type: SgUniformType::Float2,
                         ..Default::default()
+                    }],
+                }],
+                ..Default::default()
+            },
+            fs: SgShaderStageDesc {
+                source: Some(fsq_fs_src),
+                images: vec![
+                    SgShaderImageDesc {
+                        name: "tex0",
+                        image_type: SgImageType::Texture2D,
+                    },
+                    SgShaderImageDesc {
+                        name: "tex1",
+                        image_type: SgImageType::Texture2D,
+                    },
+                    SgShaderImageDesc {
+                        name: "tex2",
+                        image_type: SgImageType::Texture2D,
                     },
                 ],
-                vs: SgShaderStageDesc {
-                    source: Some(fsq_vs_src),
-                    uniform_blocks: vec!(
-                        SgShaderUniformBlockDesc {
-                            size: 8,
-                            uniforms: vec!(
-                                SgShaderUniformDesc {
-                                    name: "offset",
-                                    uniform_type: SgUniformType::Float2,
-                                    ..Default::default()
-                                }
-                            ),
-                        }
-                    ),
-                    ..Default::default()
-                },
-                fs: SgShaderStageDesc {
-                    source: Some(fsq_fs_src),
-                    images: vec![
-                        SgShaderImageDesc {
-                            name: "tex0",
-                            image_type: SgImageType::Texture2D,
-                        },
-                        SgShaderImageDesc {
-                            name: "tex1",
-                            image_type: SgImageType::Texture2D,
-                        },
-                        SgShaderImageDesc {
-                            name: "tex2",
-                            image_type: SgImageType::Texture2D,
-                        },
-                    ],
-                    ..Default::default()
-                },
-            },
-        );
-
-        self.fsq_pipeline = sg_make_pipeline(
-            &SgPipelineDesc {
-                layout: SgLayoutDesc {
-                    attrs: vec![
-                        SgVertexAttrDesc {
-                            format: SgVertexFormat::Float2,
-                            ..Default::default()
-                        },
-                    ],
-                    ..Default::default()
-                },
-                shader: fsq_shd,
-                primitive_type: SgPrimitiveType::TriangleStrip,
-                rasterizer: SgRasterizerState {
-                    sample_count: MSAA_SAMPLES,
-                    ..Default::default()
-                },
                 ..Default::default()
-            }
-        );
+            },
+        });
+
+        self.fsq_pipeline = sg_make_pipeline(&SgPipelineDesc {
+            layout: SgLayoutDesc {
+                attrs: vec![SgVertexAttrDesc {
+                    format: SgVertexFormat::Float2,
+                    ..Default::default()
+                }],
+                ..Default::default()
+            },
+            shader: fsq_shd,
+            primitive_type: SgPrimitiveType::TriangleStrip,
+            rasterizer: SgRasterizerState {
+                sample_count: MSAA_SAMPLES,
+                ..Default::default()
+            },
+            ..Default::default()
+        });
 
         self.fsq_bindings = SgBindings {
-            vertex_buffers: vec!(quad_vbuf),
+            vertex_buffers: vec![quad_vbuf],
             fs_images: vec![
                 self.offscreen_pass_desc.color_attachments[0].image,
                 self.offscreen_pass_desc.color_attachments[1].image,
@@ -587,35 +541,29 @@ impl SApp for MRT {
 
         self.dbg_pipeline = sg_make_pipeline(&SgPipelineDesc {
             layout: SgLayoutDesc {
-                attrs: vec![
-                    SgVertexAttrDesc {
-                        format: SgVertexFormat::Float2,
-                        ..Default::default()
-                    },
-                ],
+                attrs: vec![SgVertexAttrDesc {
+                    format: SgVertexFormat::Float2,
+                    ..Default::default()
+                }],
                 ..Default::default()
             },
             primitive_type: SgPrimitiveType::TriangleStrip,
             shader: sg_make_shader(&SgShaderDesc {
-                attrs: vec![
-                    SgShaderAttrDesc {
-                        name: "pos",
-                        sem_name: "POSITION",
-                        ..Default::default()
-                    },
-                ],
+                attrs: vec![SgShaderAttrDesc {
+                    name: "pos",
+                    sem_name: "POSITION",
+                    ..Default::default()
+                }],
                 vs: SgShaderStageDesc {
                     source: Some(dbg_vs_src),
                     ..Default::default()
                 },
                 fs: SgShaderStageDesc {
                     source: Some(dbg_fs_src),
-                    images: vec![
-                        SgShaderImageDesc {
-                            name: "tex",
-                            image_type: SgImageType::Texture2D,
-                        },
-                    ],
+                    images: vec![SgShaderImageDesc {
+                        name: "tex",
+                        image_type: SgImageType::Texture2D,
+                    }],
                     ..Default::default()
                 },
             }),
@@ -659,9 +607,7 @@ impl SApp for MRT {
         sg_draw(0, 36, 1);
         sg_end_pass();
 
-        let offset: [f32; 2] = [
-            (self.rx * 0.01).sin() * 0.1, (self.ry * 0.01).sin() * 0.1
-        ];
+        let offset: [f32; 2] = [(self.rx * 0.01).sin() * 0.1, (self.ry * 0.01).sin() * 0.1];
 
         sg_begin_default_pass(&self.default_pass_action, sapp_width(), sapp_height());
         sg_apply_pipeline(self.fsq_pipeline);
@@ -672,7 +618,8 @@ impl SApp for MRT {
         sg_apply_pipeline(self.dbg_pipeline);
         for i in 0..3 {
             sg_apply_viewport(i * 100, 0, 100, 100, false);
-            self.dbg_bindings.fs_images = vec![self.offscreen_pass_desc.color_attachments[i as usize].image];
+            self.dbg_bindings.fs_images =
+                vec![self.offscreen_pass_desc.color_attachments[i as usize].image];
             sg_apply_bindings(&self.dbg_bindings);
             sg_draw(0, 4, 1);
         }
@@ -703,7 +650,7 @@ fn main() {
         dbg_pipeline: Default::default(),
         dbg_bindings: Default::default(),
         offscreen_pass_action: SgPassAction {
-            colors: vec!(
+            colors: vec![
                 SgColorAttachmentAction {
                     action: SgAction::Clear,
                     val: [0.25, 0.0, 0.0, 1.0],
@@ -716,7 +663,7 @@ fn main() {
                     action: SgAction::Clear,
                     val: [0.0, 0.0, 0.25, 1.0],
                 },
-            ),
+            ],
             ..Default::default()
         },
         default_pass_action: SgPassAction {
@@ -736,7 +683,8 @@ fn main() {
             sample_count: MSAA_SAMPLES,
             window_title: title,
             ..Default::default()
-        });
+        },
+    );
 
     std::process::exit(exit_code);
 }

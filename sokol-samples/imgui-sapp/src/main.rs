@@ -39,15 +39,30 @@ impl SApp for ImGuiDemo {
 
         if imgui_begin_main_menu_bar() {
             if imgui_begin_menu(cstr!("demo"), true) {
-                imgui_menu_item(cstr!("ImGui Demo Window"), None, &mut self.imgui_demo_window, true);
-                imgui_menu_item(cstr!("Enable sokol-gfx menu"), Some(cstr!("CTRL+D")), &mut self.enable_sg_imgui_menu, true);
+                imgui_menu_item(
+                    cstr!("ImGui Demo Window"),
+                    None,
+                    &mut self.imgui_demo_window,
+                    true,
+                );
+                imgui_menu_item(
+                    cstr!("Enable sokol-gfx menu"),
+                    Some(cstr!("CTRL+D")),
+                    &mut self.enable_sg_imgui_menu,
+                    true,
+                );
                 imgui_end_menu()
             }
             if imgui_begin_menu(cstr!("sokol-gfx"), self.enable_sg_imgui_menu) {
                 imgui_menu_item(cstr!("Buffers"), None, &mut self.sg_imgui_ctx.buffers, true);
                 imgui_menu_item(cstr!("Images"), None, &mut self.sg_imgui_ctx.images, true);
                 imgui_menu_item(cstr!("Shader"), None, &mut self.sg_imgui_ctx.shaders, true);
-                imgui_menu_item(cstr!("Pipelines"), None, &mut self.sg_imgui_ctx.pipelines, true);
+                imgui_menu_item(
+                    cstr!("Pipelines"),
+                    None,
+                    &mut self.sg_imgui_ctx.pipelines,
+                    true,
+                );
                 imgui_menu_item(cstr!("Passes"), None, &mut self.sg_imgui_ctx.passes, true);
                 imgui_menu_item(cstr!("Capture"), None, &mut self.sg_imgui_ctx.capture, true);
                 imgui_end_menu();
@@ -95,12 +110,10 @@ impl ImGuiDemo {
 fn main() {
     let app = ImGuiDemo {
         pass_action: SgPassAction {
-            colors: vec!(
-                SgColorAttachmentAction {
-                    action: SgAction::Clear,
-                    val: [0.2, 0.2, 0.2, 1.0],
-                }
-            ),
+            colors: vec![SgColorAttachmentAction {
+                action: SgAction::Clear,
+                val: [0.2, 0.2, 0.2, 1.0],
+            }],
             ..Default::default()
         },
         frame_time: 0,
@@ -118,7 +131,8 @@ fn main() {
             height: 960,
             window_title: title,
             ..Default::default()
-        });
+        },
+    );
 
     std::process::exit(exit_code);
 }

@@ -23,6 +23,7 @@ impl SApp for Cube {
             ..Default::default()
         });
 
+        #[rustfmt::skip]
         let vertices: [f32; 168] = [
             -1.0, -1.0, -1.0, 1.0, 0.0, 0.0, 1.0,
             1.0, -1.0, -1.0, 1.0, 0.0, 0.0, 1.0,
@@ -59,6 +60,7 @@ impl SApp for Cube {
             },
         );
 
+        #[rustfmt::skip]
         let indices: [u16; 36] = [
             0, 1, 2, 0, 2, 3,
             6, 5, 4, 7, 6, 4,
@@ -146,81 +148,71 @@ impl SApp for Cube {
             _ => panic!()
         };
 
-        let shd = sg_make_shader(
-            &SgShaderDesc {
+        let shd = sg_make_shader(&SgShaderDesc {
+            attrs: vec![
+                SgShaderAttrDesc {
+                    name: "position",
+                    sem_name: "POS",
+                    ..Default::default()
+                },
+                SgShaderAttrDesc {
+                    name: "color0",
+                    sem_name: "COLOR",
+                    ..Default::default()
+                },
+            ],
+            vs: SgShaderStageDesc {
+                source: Some(vs_src),
+                uniform_blocks: vec![SgShaderUniformBlockDesc {
+                    size: 64,
+                    uniforms: vec![SgShaderUniformDesc {
+                        name: "mvp",
+                        uniform_type: SgUniformType::Mat4,
+                        ..Default::default()
+                    }],
+                }],
+                ..Default::default()
+            },
+            fs: SgShaderStageDesc {
+                source: Some(fs_src),
+                ..Default::default()
+            },
+        });
+
+        self.pipeline = sg_make_pipeline(&SgPipelineDesc {
+            layout: SgLayoutDesc {
+                buffers: vec![SgBufferLayoutDesc {
+                    stride: 28,
+                    ..Default::default()
+                }],
                 attrs: vec![
-                    SgShaderAttrDesc {
-                        name: "position",
-                        sem_name: "POS",
+                    SgVertexAttrDesc {
+                        format: SgVertexFormat::Float3,
                         ..Default::default()
                     },
-                    SgShaderAttrDesc {
-                        name: "color0",
-                        sem_name: "COLOR",
+                    SgVertexAttrDesc {
+                        format: SgVertexFormat::Float4,
                         ..Default::default()
                     },
                 ],
-                vs: SgShaderStageDesc {
-                    source: Some(vs_src),
-                    uniform_blocks: vec!(
-                        SgShaderUniformBlockDesc {
-                            size: 64,
-                            uniforms: vec!(
-                                SgShaderUniformDesc {
-                                    name: "mvp",
-                                    uniform_type: SgUniformType::Mat4,
-                                    ..Default::default()
-                                }
-                            ),
-                        }
-                    ),
-                    ..Default::default()
-                },
-                fs: SgShaderStageDesc {
-                    source: Some(fs_src),
-                    ..Default::default()
-                },
             },
-        );
-
-        self.pipeline = sg_make_pipeline(
-            &SgPipelineDesc {
-                layout: SgLayoutDesc {
-                    buffers: vec!(
-                        SgBufferLayoutDesc {
-                            stride: 28,
-                            ..Default::default()
-                        }
-                    ),
-                    attrs: vec!(
-                        SgVertexAttrDesc {
-                            format: SgVertexFormat::Float3,
-                            ..Default::default()
-                        },
-                        SgVertexAttrDesc {
-                            format: SgVertexFormat::Float4,
-                            ..Default::default()
-                        },
-                    ),
-                },
-                shader: shd,
-                index_type: SgIndexType::UInt16,
-                depth_stencil: SgDepthStencilState {
-                    depth_compare_func: SgCompareFunc::LessEqual,
-                    depth_write_enabled: true,
-                    ..Default::default()
-                },
-                rasterizer: SgRasterizerState {
-                    cull_mode: SgCullMode::Back,
-                    sample_count: SAMPLE_COUNT,
-                    ..Default::default()
-                },
+            shader: shd,
+            index_type: SgIndexType::UInt16,
+            depth_stencil: SgDepthStencilState {
+                depth_compare_func: SgCompareFunc::LessEqual,
+                depth_write_enabled: true,
                 ..Default::default()
-            }
-        );
+            },
+            rasterizer: SgRasterizerState {
+                cull_mode: SgCullMode::Back,
+                sample_count: SAMPLE_COUNT,
+                ..Default::default()
+            },
+            ..Default::default()
+        });
 
         self.bindings = SgBindings {
-            vertex_buffers: vec!(vbuf),
+            vertex_buffers: vec![vbuf],
             index_buffer: ibuf,
             ..Default::default()
         };
@@ -228,12 +220,10 @@ impl SApp for Cube {
 
     fn sapp_frame(&mut self) {
         let pass_action = SgPassAction {
-            colors: vec!(
-                SgColorAttachmentAction {
-                    action: SgAction::Clear,
-                    val: [0.25, 0.5, 0.75, 1.0],
-                }
-            ),
+            colors: vec![SgColorAttachmentAction {
+                action: SgAction::Clear,
+                val: [0.25, 0.5, 0.75, 1.0],
+            }],
             ..Default::default()
         };
 
@@ -259,11 +249,7 @@ impl SApp for Cube {
         sg_begin_default_pass(&pass_action, sapp_width(), sapp_height());
         sg_apply_pipeline(self.pipeline);
         sg_apply_bindings(&self.bindings);
-        sg_apply_uniforms(
-            SgShaderStage::Vertex,
-            0,
-            &mvp,
-            64);
+        sg_apply_uniforms(SgShaderStage::Vertex, 0, &mvp, 64);
         sg_draw(0, 36, 1);
         sg_end_pass();
         sg_commit();

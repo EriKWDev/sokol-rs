@@ -17,11 +17,11 @@ pub mod ffi {
         packet_frames: c_int,
         num_packets: c_int,
         stream_cb: *const c_void,
-        stream_userdata_cb: Option<unsafe extern fn(*mut f32, c_int, c_int, *mut c_void)>,
+        stream_userdata_cb: Option<unsafe extern "C" fn(*mut f32, c_int, c_int, *mut c_void)>,
         user_data: *mut c_void,
     }
 
-    extern {
+    extern "C" {
         pub fn saudio_setup(desc: *const SAudioDesc);
         pub fn saudio_shutdown();
         pub fn saudio_isvalid() -> bool;
@@ -34,9 +34,7 @@ pub mod ffi {
     }
 
     pub fn saudio_make_desc(desc: super::SAudioDesc) -> SAudioDesc {
-        let app_ptr = unsafe {
-            super::super::app::ffi::sapp_userdata()
-        };
+        let app_ptr = unsafe { super::super::app::ffi::sapp_userdata() };
 
         SAudioDesc {
             sample_rate: desc.sample_rate,
@@ -66,9 +64,7 @@ pub struct SAudioDesc {
 }
 
 pub fn saudio_setup(desc: SAudioDesc) {
-    unsafe {
-        ffi::saudio_setup(&ffi::saudio_make_desc(desc))
-    }
+    unsafe { ffi::saudio_setup(&ffi::saudio_make_desc(desc)) }
 }
 
 pub fn saudio_shutdown() {
@@ -78,15 +74,11 @@ pub fn saudio_shutdown() {
 }
 
 pub fn saudio_isvalid() -> bool {
-    unsafe {
-        ffi::saudio_isvalid()
-    }
+    unsafe { ffi::saudio_isvalid() }
 }
 
 pub fn saudio_sample_rate() -> i32 {
-    unsafe {
-        ffi::saudio_sample_rate()
-    }
+    unsafe { ffi::saudio_sample_rate() }
 }
 
 /*pub fn saudio_buffer_size() -> i32 {
@@ -96,19 +88,13 @@ pub fn saudio_sample_rate() -> i32 {
 }*/
 
 pub fn saudio_channels() -> i32 {
-    unsafe {
-        ffi::saudio_channels()
-    }
+    unsafe { ffi::saudio_channels() }
 }
 
 pub fn saudio_expect() -> i32 {
-    unsafe {
-        ffi::saudio_expect()
-    }
+    unsafe { ffi::saudio_expect() }
 }
 
 pub fn saudio_push(frames: &[f32], num_frames: i32) -> i32 {
-    unsafe {
-        ffi::saudio_push(frames.as_ptr(), num_frames)
-    }
+    unsafe { ffi::saudio_push(frames.as_ptr(), num_frames) }
 }

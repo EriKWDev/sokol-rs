@@ -46,19 +46,15 @@ fn make_sokol() {
     //
     // include paths
     //
-    build
-        .include("external/sokol");
+    build.include("external/sokol");
 
     //
     // MacOS: need ARC, so compile sokol.m with -fobjc-arc
     //
     if cfg!(target_os = "macos") {
-        build
-            .flag("-fobjc-arc")
-            .file("src/sokol.m");
+        build.flag("-fobjc-arc").file("src/sokol.m");
     } else {
-        build
-            .file("src/sokol.c");
+        build.file("src/sokol.c");
     }
 
     //
@@ -69,8 +65,7 @@ fn make_sokol() {
     //
     // silence some warnings
     //
-    build
-        .flag_if_supported("-Wno-unused-parameter");
+    build.flag_if_supported("-Wno-unused-parameter");
 
     //
     // x86_64-pc-windows-gnu: additional compile/link flags
@@ -89,13 +84,10 @@ fn make_sokol() {
     }
 
     if is_debug {
-        build
-            .flag("-D_DEBUG")
-            .flag("-DSOKOL_DEBUG");
+        build.flag("-D_DEBUG").flag("-DSOKOL_DEBUG");
     }
 
-    build
-        .compile("sokol-sys");
+    build.compile("sokol-sys");
 
     //
     // MacOS: frameworks
@@ -140,7 +132,7 @@ fn make_sokol_imgui() {
         "external/imgui/imgui.cpp",
         "external/imgui/imgui_demo.cpp",
         "external/imgui/imgui_draw.cpp",
-        "external/imgui/imgui_widgets.cpp"
+        "external/imgui/imgui_widgets.cpp",
     ]);
 
     //
@@ -158,15 +150,11 @@ fn make_sokol_imgui() {
     //
     // silence some warnings
     //
-    build
-        .flag_if_supported("-Wno-unused-parameter");
+    build.flag_if_supported("-Wno-unused-parameter");
 
-    build
-        .flag_if_supported("-std=c++11");
+    build.flag_if_supported("-std=c++11");
 
-    build
-        .cpp(true)
-        .compile("sokol-sys-imgui");
+    build.cpp(true).compile("sokol-sys-imgui");
 }
 
 fn main() {

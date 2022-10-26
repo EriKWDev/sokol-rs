@@ -32,14 +32,12 @@ impl SApp for Clear {
 fn main() {
     let clear_app = Clear {
         pass_action: SgPassAction {
-            colors: vec!(
-                SgColorAttachmentAction {
-                    action: SgAction::Clear,
-                    val: [1.0, 0.0, 0.0, 1.0],
-                }
-            ),
+            colors: vec![SgColorAttachmentAction {
+                action: SgAction::Clear,
+                val: [1.0, 0.0, 0.0, 1.0],
+            }],
             ..Default::default()
-        }
+        },
     };
 
     let title = format!("clear-sapp.rs ({:?})", sg_query_backend());
@@ -52,7 +50,8 @@ fn main() {
             gl_force_gles2: true,
             window_title: title,
             ..Default::default()
-        });
+        },
+    );
 
     std::process::exit(exit_code);
 }
